@@ -1,5 +1,6 @@
 package br.com.jatai.service_user.service;
 
+import br.com.jatai.security.service.AuthenticationService;
 import br.com.jatai.service_user.dto.UserRegistrationRequestDTO;
 import br.com.jatai.service_user.dto.UserRegistrationResponseDTO;
 import br.com.jatai.service_user.model.UserAccess;
@@ -7,7 +8,6 @@ import br.com.jatai.service_user.model.UserModel;
 import br.com.jatai.service_user.model.UserPreferences;
 import br.com.jatai.service_user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,17 +18,17 @@ import java.util.UUID;
 public class UserService {
 
     @Autowired
-    private BCryptPasswordEncoder passwordEncoder;
+    private AuthenticationService authenticationService;
 
     @Autowired
-    UserRepository repository;
+    private UserRepository repository;
 
     @Transactional
     public UserRegistrationResponseDTO save(UserRegistrationRequestDTO userSent) {
         var user = new UserModel(userSent);
 
         user.setUuid(UUID.randomUUID());
-        user.setPassword(passwordEncoder.encode(userSent.password()));
+        user.setPassword(authenticationService.passwordEncoder(user.getPassword()));
 
         user.getUserDetails().setUuid(UUID.randomUUID());
         user.getUserLocation().setUuid(UUID.randomUUID());

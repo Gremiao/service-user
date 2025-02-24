@@ -1,0 +1,1 @@
+alter table users add user_role varchar(20) not null default 'ROLE_USER';
