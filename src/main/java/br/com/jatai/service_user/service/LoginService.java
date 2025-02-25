@@ -39,6 +39,7 @@ public class LoginService {
                 kafkaService.sendMessage(LoginService.class.getSimpleName(), loginRequestDTO,"Sucess - login");
                 return ResponseEntity.ok(new LoginResponseDTO(tokenJWT));
             } catch (InvalidPasswordException e) {
+                kafkaService.sendMessage(LoginService.class.getSimpleName(), loginRequestDTO,"Error - login/password are invalid");
                 return ResponseEntity.badRequest().body("Login or passwor are invalid!");
             }
         }else{

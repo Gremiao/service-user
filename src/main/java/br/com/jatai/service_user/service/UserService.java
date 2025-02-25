@@ -23,23 +23,34 @@ public class UserService {
     @Autowired
     private UserRepository repository;
 
+    @Autowired
+    private KafkaService kafkaService;
+
     @Transactional
     public UserRegistrationResponseDTO save(UserRegistrationRequestDTO userSent) {
-        var user = new UserModel(userSent);
+        try {
+            var user = new UserModel(userSent);
 
-        user.setUuid(UUID.randomUUID());
-        user.setPassword(authenticationService.passwordEncoder(user.getPassword()));
+            user.setUuid(UUID.randomUUID());
+            user.setPassword(authenticationService.passwordEncoder(userSent.password()));
 
-        user.getUserDetails().setUuid(UUID.randomUUID());
-        user.getUserLocation().setUuid(UUID.randomUUID());
+            user.getUserDetails().setUuid(UUID.randomUUID());
+            user.getUserLocation().setUuid(UUID.randomUUID());
 
-        user.setUserAccess(new UserAccess(LocalDateTime.now(),null));
-        user.getUserAccess().setUuid(UUID.randomUUID());
+            user.setUserAccess(new UserAccess(LocalDateTime.now(),null));
+            user.getUserAccess().setUuid(UUID.randomUUID());
 
-        user.setUserPreferences(new UserPreferences());
-        user.getUserPreferences().setUuid(UUID.randomUUID());
+            user.setUserPreferences(new UserPreferences());
+            user.getUserPreferences().setUuid(UUID.randomUUID());
 
-        repository.save(user);
-        return new UserRegistrationResponseDTO(user);
+            repository.save(user);
+
+            kafkaService.sendMessage(UserService.class.getSimpleName(), user,"Sucess - add new user");
+
+            return new UserRegistrationResponseDTO(user);
+        } catch (Exception e) {
+            kafkaService.sendMessage(UserService.class.getSimpleName(), userSent,"Sucess - add new user");
+            throw new RuntimeException(e);
+        }
     }
 }

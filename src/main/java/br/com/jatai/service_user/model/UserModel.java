@@ -62,6 +62,7 @@ public class UserModel {
     }
 
     public UserModel(UserRegistrationRequestDTO userSent) {
+        this.userRole = "ROLE_USER";
         this.userDetails = new UserDetails(
                 userSent.firstName(),
                 userSent.lastName(),
